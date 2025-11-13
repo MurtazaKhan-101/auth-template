@@ -1,7 +1,24 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const User = require("../models/User");
 const { sendOTP } = require("../config/email");
+
+// Helper function to generate access and refresh tokens
+const generateTokens = (user) => {
+  // Short-lived access token (15 minutes)
+  const accessToken = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  // Long-lived refresh token (7 days)
+  const refreshToken = crypto.randomBytes(64).toString("hex");
+  const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+  return { accessToken, refreshToken, refreshTokenExpiry };
+};
 
 class AuthController {
   // User Registration
@@ -45,7 +62,7 @@ class AuthController {
       }
 
       // Hash the password
-      const saltRounds = parseInt(process.env.SALT_ROUNDS) || 12;
+      const saltRounds = parseInt(process.env.SALT_ROUNDS);
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
       // Create new user
@@ -144,12 +161,23 @@ class AuthController {
         });
       }
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
-      );
+      // Generate JWT tokens
+      const { accessToken, refreshToken, refreshTokenExpiry } =
+        generateTokens(user);
+
+      // Save refresh token to user
+      user.refreshToken = refreshToken;
+      user.refreshTokenExpiry = refreshTokenExpiry;
+      await user.save();
+
+      // Set refresh token as HTTP-only cookie
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: "/",
+      });
 
       res.status(200).json({
         success: true,
@@ -162,7 +190,7 @@ class AuthController {
           isVerified: user.isVerified,
           profileImage: user.profileImage,
         },
-        token: token,
+        token: accessToken, // Only send access token, not refresh token
       });
     } catch (error) {
       console.error("Error logging in user:", error);
@@ -215,12 +243,23 @@ class AuthController {
       user.otpExpiry = null;
       await user.save();
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: user._id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
-      );
+      // Generate JWT tokens
+      const { accessToken, refreshToken, refreshTokenExpiry } =
+        generateTokens(user);
+
+      // Save refresh token to user
+      user.refreshToken = refreshToken;
+      user.refreshTokenExpiry = refreshTokenExpiry;
+      await user.save();
+
+      // Set refresh token as HTTP-only cookie
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: "/",
+      });
 
       res.status(200).json({
         success: true,
@@ -233,7 +272,7 @@ class AuthController {
           isVerified: user.isVerified,
           profileImage: user.profileImage,
         },
-        token: token,
+        token: accessToken, // Only send access token
       });
     } catch (error) {
       console.error("Error verifying OTP:", error);
@@ -299,24 +338,71 @@ class AuthController {
 
   async refreshToken(req, res) {
     try {
-      const token = jwt.sign(
-        { id: req.user._id, email: req.user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
-      );
+      // Refresh token is now verified by middleware from HTTP-only cookie
+      const user = req.user;
+      const oldRefreshToken = req.refreshToken;
+
+      // Generate new tokens (token rotation)
+      const {
+        accessToken,
+        refreshToken: newRefreshToken,
+        refreshTokenExpiry,
+      } = generateTokens(user);
+
+      // Update user with new refresh token (rotate the refresh token)
+      user.refreshToken = newRefreshToken;
+      user.refreshTokenExpiry = refreshTokenExpiry;
+      await user.save();
+
+      // Set new refresh token as HTTP-only cookie
+      res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: "/",
+      });
+
       res.json({
         success: true,
         message: "Token refreshed successfully",
-        token: token,
-        data: {
-          token: token,
-        },
+        token: accessToken, // Only send access token
       });
     } catch (error) {
       console.error("Token refresh error:", error);
       res.status(500).json({
         success: false,
         message: "Server error during token refresh",
+      });
+    }
+  }
+
+  async logout(req, res) {
+    try {
+      const user = req.user;
+
+      // Clear refresh token from database
+      user.refreshToken = null;
+      user.refreshTokenExpiry = null;
+      await user.save();
+
+      // Clear the refresh token cookie
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
+
+      res.json({
+        success: true,
+        message: "Logged out successfully",
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({
+        success: false,
+        message: "Server error during logout",
       });
     }
   }
@@ -514,5 +600,6 @@ module.exports = {
   verifyResetOTP: authController.verifyResetOTP.bind(authController),
   resetPassword: authController.resetPassword.bind(authController),
   refreshToken: authController.refreshToken.bind(authController),
+  logout: authController.logout.bind(authController),
   getMe: authController.getMe.bind(authController),
 };

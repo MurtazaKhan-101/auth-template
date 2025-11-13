@@ -1,5 +1,22 @@
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const User = require("../models/User");
+
+// Helper function to generate access and refresh tokens (same as in authController)
+const generateTokens = (user) => {
+  // Short-lived access token (15 minutes)
+  const accessToken = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  // Long-lived refresh token (7 days)
+  const refreshToken = crypto.randomBytes(64).toString("hex");
+  const refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+
+  return { accessToken, refreshToken, refreshTokenExpiry };
+};
 
 class GoogleAuthController {
   initiate(req, res) {
@@ -94,6 +111,7 @@ class GoogleAuthController {
         // Update refresh token if a new one is provided
         if (tokenData.refresh_token) {
           existingUser.googleRefreshToken = tokenData.refresh_token;
+          existingUser.profileImage = googleUser.picture;
           await existingUser.save();
           console.log("🔄 Updated refresh token for existing user");
         }
@@ -134,12 +152,14 @@ class GoogleAuthController {
         }
       }
 
-      // Generate JWT token
-      const token = jwt.sign(
-        { id: existingUser._id, email: existingUser.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "24h" }
-      );
+      // Generate JWT tokens
+      const { accessToken, refreshToken, refreshTokenExpiry } =
+        generateTokens(existingUser);
+
+      // Save refresh token to user
+      existingUser.refreshToken = refreshToken;
+      existingUser.refreshTokenExpiry = refreshTokenExpiry;
+      await existingUser.save();
 
       const userData = {
         id: existingUser._id,
@@ -150,8 +170,17 @@ class GoogleAuthController {
         profileImage: existingUser.profileImage,
       };
 
+      // Set refresh token as HTTP-only cookie
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: "/",
+      });
+
       const encodedUserData = encodeURIComponent(JSON.stringify(userData));
-      const encodedToken = encodeURIComponent(token);
+      const encodedToken = encodeURIComponent(accessToken);
 
       res.redirect(
         `${process.env.CLIENT_URL}/auth/oauth-success?user=${encodedUserData}&token=${encodedToken}`

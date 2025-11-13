@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <AuthLayout
       title="Welcome back"
-      subtitle="Log in to continue to Hyper Thread"
+      subtitle="Log in to continue to Auth Template"
     >
       <Login />
     </AuthLayout>

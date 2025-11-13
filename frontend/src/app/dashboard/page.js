@@ -41,7 +41,9 @@ export default function DashboardPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-[#FF4500]">Hyper Thread</h1>
+              <h1 className="text-xl font-bold text-[#FF4500]">
+                Auth Template
+              </h1>
             </div>
 
             <div className="flex items-center gap-4">
@@ -79,7 +81,7 @@ export default function DashboardPage() {
             Welcome, {user.firstName}! 👋
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
-            You're successfully logged into Hyper Thread
+            You're successfully logged into Auth Template
           </p>
         </div>
 

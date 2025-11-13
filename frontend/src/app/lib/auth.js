@@ -1,145 +1,220 @@
 import apiClient from "./api";
 import { API_ENDPOINTS, STORAGE_KEYS } from "./constants";
 
-// Save auth data to localStorage
-export const saveAuthData = (token, user) => {
+// Save user data to localStorage (only user data, no tokens)
+export const saveUserData = (user) => {
   if (typeof window !== "undefined") {
-    localStorage.setItem(STORAGE_KEYS.TOKEN, token);
     localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   }
 };
 
-// Get auth data from localStorage
-export const getAuthData = () => {
+// Get user data from localStorage
+export const getUserData = () => {
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
     const userStr = localStorage.getItem(STORAGE_KEYS.USER);
-    const user = userStr ? JSON.parse(userStr) : null;
-    return { token, user };
+    return userStr ? JSON.parse(userStr) : null;
   }
-  return { token: null, user: null };
+  return null;
 };
 
-// Clear auth data from localStorage
-export const clearAuthData = () => {
+// Clear user data from localStorage
+export const clearUserData = () => {
   if (typeof window !== "undefined") {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
     localStorage.removeItem(STORAGE_KEYS.USER);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
   }
 };
 
-// Check if user is authenticated
-export const isAuthenticated = () => {
-  const { token } = getAuthData();
-  return !!token;
-};
-
-// Register user
-export const register = async (firstName, lastName, email, password) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.REGISTER,
-    { firstName, lastName, email, password },
-    { includeAuth: false }
-  );
-  return response;
-};
-
-// Login user
+// Login
 export const login = async (email, password) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.LOGIN,
-    { email, password },
-    { includeAuth: false }
-  );
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.LOGIN,
+      { email, password },
+      { includeAuth: false }
+    );
 
-  if (response.success && response.token) {
-    saveAuthData(response.token, response.user);
+    if (response.success) {
+      // Store access token in memory and user data in localStorage
+      apiClient.setAccessToken(response.token);
+      saveUserData(response.user);
+      return response;
+    }
+
+    throw new Error(response.message || "Login failed");
+  } catch (error) {
+    throw error;
   }
+};
 
-  return response;
+// Register
+export const register = async (firstName, lastName, email, password) => {
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.REGISTER,
+      { firstName, lastName, email, password },
+      { includeAuth: false }
+    );
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Verify OTP
 export const verifyOTP = async (email, otp) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.VERIFY_OTP,
-    { email, otp },
-    { includeAuth: false }
-  );
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.VERIFY_OTP,
+      { email, otp },
+      { includeAuth: false }
+    );
 
-  if (response.success && response.token) {
-    saveAuthData(response.token, response.user);
+    if (response.success) {
+      // Store access token in memory and user data in localStorage
+      apiClient.setAccessToken(response.token);
+      saveUserData(response.user);
+      return response;
+    }
+
+    throw new Error(response.message || "OTP verification failed");
+  } catch (error) {
+    throw error;
   }
-
-  return response;
 };
 
 // Resend OTP
 export const resendOTP = async (email) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.RESEND_OTP,
-    { email },
-    { includeAuth: false }
-  );
-  return response;
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.RESEND_OTP,
+      { email },
+      { includeAuth: false }
+    );
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Forgot Password
 export const forgotPassword = async (email) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.FORGOT_PASSWORD,
-    { email },
-    { includeAuth: false }
-  );
-  return response;
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.FORGOT_PASSWORD,
+      { email },
+      { includeAuth: false }
+    );
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Verify Reset OTP
 export const verifyResetOTP = async (email, otp) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.VERIFY_RESET_OTP,
-    { email, otp },
-    { includeAuth: false }
-  );
-  return response;
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.VERIFY_RESET_OTP,
+      { email, otp },
+      { includeAuth: false }
+    );
+
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Reset Password
 export const resetPassword = async (email, otp, newPassword) => {
-  const response = await apiClient.post(
-    API_ENDPOINTS.RESET_PASSWORD,
-    { email, otp, newPassword },
-    { includeAuth: false }
-  );
-  return response;
-};
+  try {
+    const response = await apiClient.post(
+      API_ENDPOINTS.RESET_PASSWORD,
+      { email, otp, newPassword },
+      { includeAuth: false }
+    );
 
-// Get current user
-export const getCurrentUser = async () => {
-  const response = await apiClient.get(API_ENDPOINTS.GET_ME);
-  return response;
-};
-
-// Refresh token
-export const refreshToken = async () => {
-  const response = await apiClient.post(API_ENDPOINTS.REFRESH_TOKEN);
-
-  if (response.success && response.token) {
-    const { user } = getAuthData();
-    saveAuthData(response.token, user);
+    return response;
+  } catch (error) {
+    throw error;
   }
+};
 
-  return response;
+// Get user info (protected route)
+export const getMe = async () => {
+  try {
+    const response = await apiClient.get(API_ENDPOINTS.GET_ME);
+    return response;
+  } catch (error) {
+    throw error;
+  }
 };
 
 // Logout
-export const logout = () => {
-  clearAuthData();
+export const logout = async () => {
+  try {
+    // Call API client logout which handles server request and local cleanup
+    await apiClient.logout();
+
+    // Clear user data from localStorage
+    clearUserData();
+
+    return { success: true };
+  } catch (error) {
+    // Even if server request fails, we should clear local data
+    clearUserData();
+    apiClient.clearAccessToken();
+    throw error;
+  }
 };
 
-// Refresh Google Token
-export const refreshGoogleToken = async () => {
-  const response = await apiClient.post(API_ENDPOINTS.GOOGLE_REFRESH_TOKEN);
-  return response;
+// Check if user is authenticated (has valid access token)
+export const isAuthenticated = () => {
+  return !!apiClient.getAccessToken();
+};
+
+// Initialize auth state (call this on app startup)
+export const initializeAuth = async () => {
+  try {
+    // First, check if we have any user data in localStorage
+    const existingUser = getUserData();
+
+    // Try to refresh token first (this will work if there's a valid refresh token cookie)
+    try {
+      await apiClient.refreshAccessToken();
+      // If refresh succeeds, try to get current user info
+      const response = await apiClient.get(API_ENDPOINTS.GET_ME);
+
+      if (response.success) {
+        saveUserData(response.user);
+        return { authenticated: true, user: response.user };
+      }
+    } catch (refreshError) {
+      console.log(
+        "No valid refresh token or token refresh failed:",
+        refreshError.message
+      );
+      // If refresh fails, clear any stale data
+      clearUserData();
+      apiClient.clearAccessToken();
+    }
+
+    return { authenticated: false, user: null };
+  } catch (error) {
+    // If anything fails, clear any stale data
+    clearUserData();
+    apiClient.clearAccessToken();
+    return { authenticated: false, user: null };
+  }
+};
+
+// Handle OAuth success (for Google login)
+export const handleOAuthSuccess = (user, token) => {
+  // Store access token in memory and user data in localStorage
+  apiClient.setAccessToken(token);
+  saveUserData(user);
+  return { success: true, user };
 };

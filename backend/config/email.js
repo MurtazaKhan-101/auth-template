@@ -44,21 +44,21 @@ const sendOTP = async (email, otp, type = "verification") => {
       from: process.env.EMAIL_FROM,
       to: email,
       subject: isPasswordReset
-        ? "Your OTP for Hyper Thread Password Reset"
-        : "Your OTP for Hyper Thread Verification",
+        ? "Your OTP for Auth Template Password Reset"
+        : "Your OTP for Auth Template Verification",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9;">
           <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
             <h2 style="color: #333; text-align: center; margin-bottom: 20px;"> ${
               isPasswordReset
                 ? "Reset your password"
-                : "Welcome to Hyper Thread"
+                : "Welcome to Auth Template"
             }</h2>
             <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
               ${
                 isPasswordReset
                   ? "To reset your password, please use the following One-Time Password (OTP):"
-                  : "Thank you for registering with Hyper Thread. To complete your email verification, please use the following One-Time Password (OTP):"
+                  : "Thank you for registering with Auth Template. To complete your email verification, please use the following One-Time Password (OTP):"
               }
             </p>
             <div style="text-align: center; margin: 30px 0;">
@@ -78,7 +78,7 @@ const sendOTP = async (email, otp, type = "verification") => {
             </p>
             <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
             <p style="color: #999; font-size: 12px; text-align: center;">
-              © 2025 Hyper Thread. All rights reserved.
+              © 2025 Auth Template. All rights reserved.
             </p>
           </div>
         </div>

@@ -1,6 +1,6 @@
 // API Base URL
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3005";
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3003";
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -13,6 +13,7 @@ export const API_ENDPOINTS = {
   VERIFY_RESET_OTP: "/auth/verify-reset-otp",
   RESET_PASSWORD: "/auth/reset-password",
   REFRESH_TOKEN: "/auth/refresh-token",
+  LOGOUT: "/auth/logout",
   GET_ME: "/auth/me",
 
   // Google OAuth endpoints
@@ -23,9 +24,7 @@ export const API_ENDPOINTS = {
 
 // Local Storage Keys
 export const STORAGE_KEYS = {
-  TOKEN: "auth_token",
-  USER: "user_data",
-  REFRESH_TOKEN: "refresh_token",
+  USER: "user_data", // Only store user data, not tokens
 };
 
 // Routes

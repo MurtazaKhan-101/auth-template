@@ -32,7 +32,7 @@ export default function Home() {
       <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex items-center justify-between h-14">
-            <h1 className="text-xl font-bold text-[#FF4500]">Hyper Thread</h1>
+            <h1 className="text-xl font-bold text-[#FF4500]">Auth Template</h1>
 
             <div className="flex items-center gap-3">
               <Link href={ROUTES.LOGIN}>
@@ -50,7 +50,7 @@ export default function Home() {
       <main className="max-w-6xl mx-auto px-4 py-16">
         <div className="text-center mb-16">
           <h2 className="text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Welcome to Hyper Thread
+            Welcome to Auth Template
           </h2>
           <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
             Connect with communities and share what matters to you
@@ -109,7 +109,7 @@ export default function Home() {
             Ready to dive in?
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
-            Join thousands of users already connected on Hyper Thread
+            Join thousands of users already connected on Auth Template
           </p>
           <Link href={ROUTES.SIGNUP}>
             <Button variant="primary" className="px-12 py-3 text-base">
@@ -123,10 +123,10 @@ export default function Home() {
       <footer className="border-t border-gray-200 dark:border-gray-800 mt-16">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>&copy; 2025 Hyper Thread. All rights reserved.</p>
+            <p>&copy; 2025 Auth Template. All rights reserved.</p>
             <p className="mt-2">
-              By using Hyper Thread, you agree to our User Agreement and Privacy
-              Policy.
+              By using Auth Template, you agree to our User Agreement and
+              Privacy Policy.
             </p>
           </div>
         </div>

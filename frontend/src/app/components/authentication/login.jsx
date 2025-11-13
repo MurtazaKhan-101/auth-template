@@ -161,7 +161,7 @@ export default function Login() {
 
       <div className="mt-6 text-center text-sm">
         <span className="text-gray-600 dark:text-gray-400">
-          New to Hyper Thread?{" "}
+          New to Auth Template?{" "}
         </span>
         <Link
           href={ROUTES.SIGNUP}

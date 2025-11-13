@@ -40,6 +40,13 @@ const authenticate = async (req, res, next) => {
       next();
     } catch (tokenError) {
       console.log("❌ Token verification failed:", tokenError.message);
+      if (tokenError.name === "TokenExpiredError") {
+        return res.status(401).json({
+          success: false,
+          message: "Token expired.",
+          expired: true,
+        });
+      }
       return res.status(401).json({
         success: false,
         message: "Invalid token.",
@@ -50,6 +57,43 @@ const authenticate = async (req, res, next) => {
     res.status(500).json({
       success: false,
       message: "Server error during authentication",
+    });
+  }
+};
+
+// Middleware to verify refresh token from HTTP-only cookie
+const verifyRefreshToken = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token not found.",
+      });
+    }
+
+    // Find user with this refresh token
+    const user = await User.findOne({
+      refreshToken: refreshToken,
+      refreshTokenExpiry: { $gt: new Date() },
+    }).select("-password");
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired refresh token.",
+      });
+    }
+
+    req.user = user;
+    req.refreshToken = refreshToken;
+    next();
+  } catch (error) {
+    console.error("❌ Refresh token verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during token verification",
     });
   }
 };
@@ -77,4 +121,5 @@ const authorize = (...roles) => {
 module.exports = {
   authenticate,
   authorize,
+  verifyRefreshToken,
 };
