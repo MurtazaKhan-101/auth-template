@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { Button, Card, Spinner } from "../components/ui";
 import { ROUTES } from "../lib/constants";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -57,11 +58,11 @@ export default function DashboardPage() {
                     className="rounded-full"
                   />
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-[#FF4500] flex items-center justify-center text-white font-bold">
+                  <div className="w-8 h-8 rounded-full bg-[#FF4500] items-center justify-center text-white font-bold">
                     {user.firstName?.[0]?.toUpperCase() || "U"}
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                <span className="text-sm hidden sm:flex font-medium text-gray-900 dark:text-gray-100">
                   {user.firstName} {user.lastName}
                 </span>
               </div>
@@ -78,14 +79,14 @@ export default function DashboardPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Welcome, {user.firstName}! 👋
+            Welcome, {user.firstName}!
           </h2>
           <p className="text-gray-600 dark:text-gray-400">
             You're successfully logged into Auth Template
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
           {/* User Info Card */}
           <Card className="p-6">
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
@@ -138,37 +139,6 @@ export default function DashboardPage() {
               <button className="w-full text-left px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 text-sm text-gray-700 dark:text-gray-300 transition-colors">
                 Help & Support
               </button>
-            </div>
-          </Card>
-
-          {/* Stats Card */}
-          <Card className="p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
-              Account Stats
-            </h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Posts
-                </span>
-                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  0
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Comments
-                </span>
-                <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                  0
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Karma
-                </span>
-                <span className="text-lg font-bold text-[#FF4500]">1</span>
-              </div>
             </div>
           </Card>
         </div>

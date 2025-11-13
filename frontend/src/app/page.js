@@ -72,7 +72,6 @@ export default function Home() {
         {/* Features Section */}
         <div className="grid md:grid-cols-3 gap-6 mb-16">
           <Card className="p-6 text-center">
-            <div className="text-4xl mb-4">🔐</div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
               Secure Authentication
             </h3>
@@ -83,7 +82,6 @@ export default function Home() {
           </Card>
 
           <Card className="p-6 text-center">
-            <div className="text-4xl mb-4">⚡</div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
               Lightning Fast
             </h3>
@@ -93,7 +91,6 @@ export default function Home() {
           </Card>
 
           <Card className="p-6 text-center">
-            <div className="text-4xl mb-4">🎨</div>
             <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
               Clean Design
             </h3>
