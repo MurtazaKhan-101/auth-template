@@ -6,7 +6,6 @@ import { useAuth } from "../context/AuthContext";
 import { Button, Card, Spinner } from "../components/ui";
 import { ROUTES } from "../lib/constants";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -147,7 +146,7 @@ export default function DashboardPage() {
         <div className="mt-8">
           <Card className="p-8 text-center">
             <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              🎉 You're all set!
+              You're all set!
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Your authentication system is working perfectly. Start building
