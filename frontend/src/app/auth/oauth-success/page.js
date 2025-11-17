@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { saveAuthData } from "../../lib/auth";
+import { useAuth } from "../../context/AuthContext";
 import { ROUTES } from "../../lib/constants";
 import { Spinner } from "../../components/ui";
 
 export default function OAuthSuccessPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { handleOAuthSuccess } = useAuth();
   const [status, setStatus] = useState("processing");
 
   useEffect(() => {
@@ -28,15 +29,24 @@ export default function OAuthSuccessPage() {
           const user = JSON.parse(decodeURIComponent(userParam));
           const token = decodeURIComponent(tokenParam);
 
-          // Save auth data
-          saveAuthData(token, user);
+          // Handle OAuth success with new auth system
+          const result = handleOAuthSuccess(user, token);
 
-          setStatus("success");
+          if (result.success) {
+            setStatus("success");
 
-          // Redirect to dashboard
-          setTimeout(() => {
-            window.location.href = ROUTES.DASHBOARD;
-          }, 1000);
+            // Redirect based on onboarding status
+            setTimeout(() => {
+              if (!user.onboardingCompleted) {
+                window.location.href = ROUTES.ONBOARDING;
+              } else {
+                window.location.href = ROUTES.DASHBOARD;
+              }
+            }, 1000);
+          } else {
+            setStatus("error");
+            setTimeout(() => router.push(ROUTES.LOGIN), 2000);
+          }
         } else {
           setStatus("error");
           setTimeout(() => router.push(ROUTES.LOGIN), 2000);
