@@ -37,11 +37,7 @@ export default function OAuthSuccessPage() {
 
             // Redirect based on onboarding status
             setTimeout(() => {
-              if (!user.onboardingCompleted) {
-                window.location.href = ROUTES.ONBOARDING;
-              } else {
-                window.location.href = ROUTES.DASHBOARD;
-              }
+              window.location.href = ROUTES.DASHBOARD;
             }, 1000);
           } else {
             setStatus("error");
